@@ -20,11 +20,15 @@ auth = tweepy.OAuthHandler(API_KEY, API_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
 api = tweepy.API(auth)
 
-user = api.verify_credentials()
+try: 
+    user = api.verify_credentials()
+    if user: 
+        print(f"User name: {user.name}")
+        print(f"User I.D: {user.id}")
+except tweepy.TweepyError as e: 
+    print(f"Error: {e.reason}")
 
-for follower in tweepy.Cursor(api.get_followers).items(): 
-    follower.follow()
-    print("Followed everyone that is " + user.name)
+
 
 # Function that fetches the word for the day
 def fetch_word_of_the_day():
@@ -43,3 +47,29 @@ def fetch_word_of_the_day():
             return {"word": word, "definition": definition}
     return None
 
+new_word = fetch_word_of_the_day()
+if new_word: 
+    print(f"Word: {new_word['word']}\nDefinition: {new_word['definition']}")
+else: 
+    print("Failed to fetch a new word")
+
+def post_word_of_the_day(): 
+    word_of_the_day = fetch_word_of_the_day()
+
+    if word_of_the_day:
+        tweet = f"Word of the day: {word_of_the_day['word']}\nDefinition: {word_of_the_day['definition']}"
+
+        try: 
+            api.update_status(tweet)
+            print(f"Tweeted: {tweet}")
+        except tweepy.TweepError as e:
+            print(f"Error: {e.reason}") 
+    else: 
+        print("Failed to fetch a new word")
+
+def main():
+    while True: 
+        post_word_of_the_day()
+        time.sleep(86400)
+if __name__ == "__main__":
+    main()
