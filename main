@@ -1,15 +1,45 @@
 import tweepy
 import _tkinter
+import datetime
+import time
+import requests
 
+# API credentials
 API_KEY = '5cQGdD31CxIIDX094FyEGFLkZ'
 API_SECRET = 'zzli7r6XM0vZR1x1S1IgcR0wPUKTQsyR1twk1bbEyctTfZdIKr'
 
 ACCESS_TOKEN = '1807846037756715008-wmUx8GV63ynxbtKYZDdqbisXrKG4kz'
 ACCESS_SECRET = 'p5ROLR2DlbzX4GOilY0MHuQowQ9TA8HCPPTULF0m055zI'
 
+# WordsAPI credentials 
+WORDS_API = '1c9daddb3bmsh0579778b08064afp13b039jsnc5840de11bc1'
+WORDS_URL = 'https://wordsapiv1.p.rapidapi.com/words/'
+
+# Authenticating to twitter
 auth = tweepy.OAuthHandler(API_KEY, API_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
 api = tweepy.API(auth)
 
 user = api.verify_credentials()
-print (user.name)
+
+for follower in tweepy.Cursor(api.get_followers).items(): 
+    follower.follow()
+    print("Followed everyone that is " + user.name)
+
+# Function that fetches the word for the day
+def fetch_word_of_the_day():
+    
+    headers = {
+        "x-rapidapi-key": WORDS_API,
+        "x-rapidapi-host": "wordsapiv1.p.rapidapi.com"
+    }
+    response = requests.get(f"{WORDS_URL}?random=true", headers=headers)
+    if response.status_code == 200:
+        word_data = response.json()
+        word = word_data.get('word')
+        definitions = word_data.get('results', [])
+        if definitions:
+            definition = definitions[0].get('definition')
+            return {"word": word, "definition": definition}
+    return None
+
