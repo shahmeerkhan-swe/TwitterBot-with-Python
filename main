@@ -1,15 +1,15 @@
 import tweepy
 import _tkinter
 
-API_KEY = 'f28RbyTlc9BsY4U9LDUmru4Aw'
-API_SECRET = 'kitlAfK25HHAH8K16VwUh82dzGMX7FeWaIC9HqDuNP8v0Mv5V3'
+API_KEY = '5cQGdD31CxIIDX094FyEGFLkZ'
+API_SECRET = 'zzli7r6XM0vZR1x1S1IgcR0wPUKTQsyR1twk1bbEyctTfZdIKr'
 
-ACCESS_TOKEN = '1807846037756715008-8piYmUHMXztdWyZjBrSIQ8n7bRd5ci'
-ACCESS_SECRET = 'isSXwC1OabuPJgtmqhi2Dtmu0DJHh0HSAyly4vBfCL8zu'
+ACCESS_TOKEN = '1807846037756715008-wmUx8GV63ynxbtKYZDdqbisXrKG4kz'
+ACCESS_SECRET = 'p5ROLR2DlbzX4GOilY0MHuQowQ9TA8HCPPTULF0m055zI'
 
 auth = tweepy.OAuthHandler(API_KEY, API_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
 api = tweepy.API(auth)
 
-user = api.me()
+user = api.verify_credentials()
 print (user.name)
