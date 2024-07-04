@@ -1,5 +1,4 @@
 import tweepy
-import _tkinter
 import datetime
 import time
 import requests
@@ -7,69 +6,68 @@ import requests
 # API credentials
 API_KEY = '5cQGdD31CxIIDX094FyEGFLkZ'
 API_SECRET = 'zzli7r6XM0vZR1x1S1IgcR0wPUKTQsyR1twk1bbEyctTfZdIKr'
-
-ACCESS_TOKEN = '1807846037756715008-wmUx8GV63ynxbtKYZDdqbisXrKG4kz'
-ACCESS_SECRET = 'p5ROLR2DlbzX4GOilY0MHuQowQ9TA8HCPPTULF0m055zI'
+ACCESS_TOKEN = '1807846037756715008-JFO2kKsyk36n3wQQhmdV5D6MldqnGg'
+ACCESS_SECRET = 'aWoQROOl7RjfWx0NYbSMvDHS4ACbSxA9P5BcG1692gPSg'
+BEARER_TOKEN = 'AAAAAAAAAAAAAAAAAAAAAGBzugEAAAAAT%2F6DCQGluxdpiodSA4yZf3Udir4%3DwANbPZ30DYvTDsq3KrFdh48FomxckrMKpFc1v0VG6fI3fbrytq'
 
 # WordsAPI credentials 
-WORDS_API = '1c9daddb3bmsh0579778b08064afp13b039jsnc5840de11bc1'
+WORDS_API_KEY = '1c9daddb3bmsh0579778b08064afp13b039jsnc5840de11bc1'
 WORDS_URL = 'https://wordsapiv1.p.rapidapi.com/words/'
 
-# Authenticating to twitter
-auth = tweepy.OAuthHandler(API_KEY, API_SECRET)
-auth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
-api = tweepy.API(auth)
+# Authenticating to Twitter
+client = tweepy.Client(bearer_token=BEARER_TOKEN, consumer_key=API_KEY, consumer_secret=API_SECRET,
+                       access_token=ACCESS_TOKEN, access_token_secret=ACCESS_SECRET)
 
-try: 
-    user = api.verify_credentials()
-    if user: 
-        print(f"User name: {user.name}")
-        print(f"User I.D: {user.id}")
-except tweepy.TweepyError as e: 
-    print(f"Error: {e.reason}")
-
-
+# try:
+#     user = api.verify_credentials()
+#     if user:
+#         print(f"User name: {user.name}")
+#         print(f"User I.D: {user.id}")
+# except tweepy.TweepyException as e:
+#     print(f"Error: {e}")
 
 # Function that fetches the word for the day
 def fetch_word_of_the_day():
-    
     headers = {
-        "x-rapidapi-key": WORDS_API,
+        "x-rapidapi-key": WORDS_API_KEY,
         "x-rapidapi-host": "wordsapiv1.p.rapidapi.com"
     }
-    response = requests.get(f"{WORDS_URL}?random=true", headers=headers)
-    if response.status_code == 200:
-        word_data = response.json()
-        word = word_data.get('word')
-        definitions = word_data.get('results', [])
-        if definitions:
-            definition = definitions[0].get('definition')
-            return {"word": word, "definition": definition}
+    try:
+        response = requests.get(f"{WORDS_URL}?random=true", headers=headers)
+        print(f"Response status code: {response.status_code}")
+        print(f"Response content: {response.text}")
+        if response.status_code == 200:
+            word_data = response.json()
+            word = word_data.get('word')
+            definitions = word_data.get('results', [])
+            if definitions:
+                definition = definitions[0].get('definition')
+                return {"word": word, "definition": definition}
+        else:
+            print(f"Error fetching word: {response.status_code} - {response.text}")
+    except requests.RequestException as e:
+        print(f"Request failed: {e}")
     return None
 
 new_word = fetch_word_of_the_day()
-if new_word: 
-    print(f"Word: {new_word['word']}\nDefinition: {new_word['definition']}")
-else: 
-    print("Failed to fetch a new word")
 
-def post_word_of_the_day(): 
-    word_of_the_day = fetch_word_of_the_day()
+def post_word_of_the_day():
+    word_of_the_day = new_word
 
     if word_of_the_day:
         tweet = f"Word of the day: {word_of_the_day['word']}\nDefinition: {word_of_the_day['definition']}"
-
-        try: 
-            api.update_status(tweet)
+        try:
+            client.create_tweet(text=tweet)
             print(f"Tweeted: {tweet}")
-        except tweepy.TweepError as e:
-            print(f"Error: {e.reason}") 
-    else: 
+        except tweepy.TweepyException as e:
+            print(f"Error: {e}")
+    else:
         print("Failed to fetch a new word")
 
 def main():
-    while True: 
+    while True:
         post_word_of_the_day()
         time.sleep(86400)
+
 if __name__ == "__main__":
     main()
